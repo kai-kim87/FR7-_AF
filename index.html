@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SONY 카메라 AF 시스템 분석 보고서</title>
+    <style>
+        /* --- 기본 스타일 및 글꼴 설정 --- */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            margin: 0;
+            color: #333;
+            overflow: hidden; 
+            height: 100vh;
+        }
+
+        /* --- 고정 헤더 --- */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(44, 62, 80, 0.85);
+            backdrop-filter: blur(5px);
+            color: white;
+            padding: 16px 0; /* 10% 증가 */
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        header h1 {
+            margin: 0;
+            padding-left: 44px; /* 10% 증가 */
+            font-size: 2.0em; /* 10% 증가 */
+        }
+
+        /* --- 네비게이션 메뉴 --- */
+        nav {
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 13px; /* 10% 증가 */
+            font-size: 1.2em; /* 10% 증가 */
+            font-weight: 700;
+            transition: color 0.3s;
+        }
+
+        nav a:hover, nav a.active-nav {
+            color: #29bca4;
+        }
+        
+        .header-placeholder {
+            width: 308px; /* 10% 증가 */
+        }
+        
+        /* --- 풀페이지 섹션 설정 --- */
+        main {
+            height: 100vh;
+            width: 100%;
+            overflow-y: scroll;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        main::-webkit-scrollbar {
+             display: none;
+        }
+
+        section {
+            height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-sizing: border-box;
+            padding: 132px 44px 44px 44px; /* 10% 증가 */
+        }
+
+        /* --- 섹션별 스타일 --- */
+        #intro, #guide { background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white; }
+        #principle, #equipment, #failure-hood { background-color: #f4f7f6; }
+        #face-af, #analysis, #failure-angle { background-color: #e9ecef; }
+
+        .content-wrapper {
+            background-color: white;
+            padding: 44px 55px; /* 10% 증가 */
+            border-radius: 12px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 1540px; /* 10% 증가 */
+            text-align: left;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        
+        #intro .content-wrapper, #guide .content-wrapper { background: none; box-shadow: none; text-align: center; }
+        #intro .icon { font-size: 5.5em; }
+        #intro h2 { color: white; font-size: 5.0em; font-weight: 900; border-bottom: none; text-shadow: 0 4px 15px rgba(0,0,0,0.2); margin: 22px 0; }
+        #intro p.description { color: #c7d5e0; font-size: 1.65em; max-width: 1000px; margin: 0 auto; text-align: center; }
+        
+        h2 { font-size: 2.4em; color: #3498db; border-bottom: 3px solid #eaeaea; padding-bottom: 16px; margin-top: 0; margin-bottom: 22px; }
+        h3 { font-size: 1.65em; color: #2980b9; margin-top: 28px; margin-bottom: 16px; }
+        
+        ul { list-style: none; padding-left: 0; }
+        li { margin-bottom: 11px; font-size: 1.2em; line-height: 1.7; }
+        p { font-size: 1.2em; line-height: 1.7; }
+        .list-emoji li::before { content: '✅'; margin-right: 11px; }
+        .list-priority { padding-left: 22px; }
+        .list-priority li { margin-bottom: 22px; }
+        
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(275px, 1fr)); /* 10% 증가 */
+            gap: 22px;
+            margin-top: 22px;
+        }
+        .gallery-item img {
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .gallery-item .caption { text-align: center; font-size: 1.1em; color: #555; margin-top: 11px; }
+
+    </style>
+</head>
+<body>
+    <header>
+        <h1>AF 시스템 분석</h1>
+        <nav>
+            <a href="#intro">소개</a>
+            <a href="#principle">작동 원리</a>
+            <a href="#face-af">얼굴 인식</a>
+            <a href="#failure-hood">실패(후드)</a>
+            <a href="#failure-angle">실패(각도)</a>
+            <a href="#analysis">심층 분석</a>
+            <a href="#equipment">장비 성능</a>
+            <a href="#guide">최종 가이드</a>
+        </nav>
+        <div class="header-placeholder"></div>
+    </header>
+
+    <main>
+        <section id="intro">
+            <div class="content-wrapper">
+                <div class="icon">🎯</div>
+                <h2>SONY 카메라 AF 시스템 최종 분석</h2>
+                <p class="description">FR7, A7S3 모델을 기준으로, 포커 방송 환경에서 AF 성능에 영향을 미치는 요인들을 종합적으로 분석합니다.</p>
+            </div>
+        </section>
+
+        <section id="principle">
+            <div class="content-wrapper">
+                <h2>1. AF 시스템의 작동 원리: 3단계 우선순위</h2>
+                <ul>
+                    <li class="list-priority"><strong>🥇 1순위: 눈 AF (Eye AF) - 최상의 정밀도</strong><br>AI가 눈의 패턴을 인식하여 눈동자에 정확히 초점을 맞춥니다. 피사체가 움직여도 끈질기게 따라가는 가장 이상적인 상태입니다.</li>
+                    <li class="list-priority"><strong>🥈 2순위: 얼굴 인식 AF (Face Detection AF) - 차선책</strong><br>선글라스, 그림자 등으로 눈이 보이지 않을 때, 얼굴 전체 윤곽을 인식하여 초점을 유지합니다.</li>
+                    <li class="list-priority"><strong>🥉 3순위: AF 실패 또는 재탐색 (AF Failure / Re-scan)</strong><br>후드나 숙인 고개로 눈과 얼굴 특징이 모두 가려지면, 초점 대상을 잃고 새로운 기준점을 찾기 위해 렌즈가 움직입니다.</li>
+                </ul>
+                <div class="gallery-grid" style="grid-template-columns: 1fr 1fr;">
+                     <div class="gallery-item"><a href="3.png" target="_blank"><img src="3.png" alt="눈 AF 예시"></a><p class="caption">1순위: 눈 AF 예시</p></div>
+                     <div class="gallery-item"><a href="5.png" target="_blank"><img src="5.png" alt="얼굴 인식 AF 예시"></a><p class="caption">2순위: 얼굴 인식 AF 예시</p></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="face-af">
+            <div class="content-wrapper">
+                <h2>🥈 2순위: 얼굴 인식 AF 성공 사례</h2>
+                <p>선글라스로 눈이 보이지 않더라도, 얼굴 윤곽이 명확하면 시스템이 안정적으로 초점을 유지합니다.</p>
+                <div class="gallery-grid" style="grid-template-columns: 1fr 1fr;">
+                    <div class="gallery-item"><a href="4.png" target="_blank"><img src="4.png" alt="성공적인 얼굴인식 예시"></a><p class="caption">사례 4: 선글라스</p></div>
+                    <div class="gallery-item"><a href="6.png" target="_blank"><img src="6.png" alt="얼굴 인식 AF 예시 2"></a><p class="caption">사례 6: 선글라스</p></div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="failure-hood">
+            <div class="content-wrapper">
+                <h2>🥉 AF 실패 사례 1: 후드와 그림자</h2>
+                <p>후드를 깊게 쓰면 눈, 눈썹, 이마 등 얼굴의 핵심 정보가 가려집니다. AI는 이곳에 '사람 얼굴'이 있다는 데이터 자체를 얻을 수 없어 Eye AF와 Face AF 모두 실패하고 초점을 놓치게 됩니다.</p>
+                <div class="gallery-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+                    <div class="gallery-item"><a href="7.png" target="_blank"><img src="7.png" alt="AF 실패 예시 1"></a><p class="caption">사례 7: 후드</p></div>
+                    <div class="gallery-item"><a href="8.png" target="_blank"><img src="8.png" alt="AF 실패 예시 2"></a><p class="caption">사례 8: 후드+숙인고개</p></div>
+                    <div class="gallery-item"><a href="9.png" target="_blank"><img src="9.png" alt="AF 실패 예시 3"></a><p class="caption">사례 9: 후드</p></div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="failure-angle">
+            <div class="content-wrapper">
+                <h2>🥉 AF 실패 사례 2: 얼굴 각도와 가려짐</h2>
+                <p>후드를 벗었더라도, 얼굴이 정면을 향하지 않거나 손으로 일부를 가리면 AI가 학습한 '표준 얼굴' 패턴과 달라져 AF가 불안정해질 수 있습니다.</p>
+                <div class="gallery-grid" style="grid-template-columns: 1fr 1fr;">
+                    <div class="gallery-item"><a href="10.png" target="_blank"><img src="10.png" alt="AF 실패 예시 4"></a><p class="caption">사례 10: 얼굴 각도</p></div>
+                    <div class="gallery-item"><a href="11.png" target="_blank"><img src="11.png" alt="AF 실패 예시 5"></a><p class="caption">사례 11: 손+얼굴각도</p></div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="analysis">
+            <div class="content-wrapper">
+                <h2>심층 분석: 조명과 장비의 영향</h2>
+                <h3>조명과 AF의 상관관계</h3>
+                <p>카메라 AF를 위한 '좋은 조명'이란 무조건 밝은 조명이 아니라, 피사체의 윤곽을 드러내주는 **'입체적인 조명'**을 의미합니다. 그림자가 없는 '플랫한 조명'은 AF가 기준점을 잡기 어렵게 만듭니다.</p>
+                <div class="gallery-grid" style="grid-template-columns: 1fr 1fr;">
+                       <div class="gallery-item"><a href="1.png" target="_blank"><img src="1.png" alt="플랫한 조명 예시"></a><p class="caption">사례 1: 플랫한 조명</p></div>
+                       <div class="gallery-item"><a href="2.png" target="_blank"><img src="2.png" alt="입체적인 조명 예시"></a><p class="caption">사례 2: 입체적인 조명</p></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="equipment">
+             <div class="content-wrapper">
+                <h2>장비의 물리적 성능 (가장 결정적인 차이)</h2>
+                <p>AF 시스템을 '두뇌'와 '근육'에 비유할 수 있습니다.</p>
+                 <ul>
+                    <li><strong>🧠 두뇌 (프로세서):</strong> A7S3와 FR7은 동일한 BIONZ XR 프로세서를 탑재하여, "어디에 초점을 맞출지" 결정하는 **판단 능력과 속도는 거의 동일**합니다.</li>
+                    <li><strong>💪 근육 (렌즈 AF 모터):</strong> 두뇌의 명령을 받아 렌즈를 물리적으로 움직이는 부분에서 **결정적인 성능 차이**가 발생합니다.
+                        <ul style="padding-left: 20px; margin-top: 10px;">
+                            <li><strong>A7S3 + 70-200GM2:</strong> 최신 **XD 리니어 모터 4개**가 탑재된 '최상급 운동선수의 근육'입니다.</li>
+                            <li><strong>FR7 + 28-135mm:</strong> AF 모터 기술이 이전 세대의 것으로, 70-200GM2에 비해 반응성이 떨어집니다.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="guide">
+             <div class="content-wrapper">
+                 <h2 style="color:white;">최종 실용 가이드: "AF는 그림자를 좋아한다"</h2>
+                 <ul class="list-emoji" style="color:white; font-size: 1.3em; text-align:left; display:inline-block;">
+                    <li>선글라스는 대부분 얼굴 인식으로 커버 가능하지만, 심한 조명 반사나 얼굴을 많이 가리는 각도는 변수가 될 수 있습니다.</li>
+                    <li>후드와 숙인 고개는 요주의 대상입니다. 이 경우 수동 초점(MF)이나 터치 추적을 준비하는 것이 안전합니다.</li>
+                    <li>최상의 AF 성능은 렌즈가 결정합니다. 까다로운 환경에서는 렌즈의 모터 성능이 가장 중요합니다.</li>
+                    <li>조명은 밝기보다 입체감입니다. 선명한 그림자를 만들어주는 것이 AF 시스템에 훨씬 더 유리하게 작용합니다.</li>
+                 </ul>
+            </div>
+        </section>
+    </main>
+    
+    <script>
+        window.addEventListener('wheel', function(e) { e.preventDefault(); }, { passive: false });
+        let currentSection = 0;
+        const sections = document.querySelectorAll('section');
+        const totalSections = sections.length;
+        let isScrolling = false;
+        const mainContainer = document.querySelector('main');
+
+        mainContainer.addEventListener('wheel', function(e) {
+            if (isScrolling) return;
+            if (e.deltaY > 0) {
+                if (currentSection < totalSections - 1) { currentSection++; scrollToSection(currentSection); }
+            } else {
+                if (currentSection > 0) { currentSection--; scrollToSection(currentSection); }
+            }
+        });
+
+        document.querySelectorAll('nav a').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+                for(let i=0; i < totalSections; i++){
+                    if(sections[i].id === targetId){ currentSection = i; scrollToSection(currentSection); break; }
+                }
+            });
+        });
+
+        function scrollToSection(index) {
+            isScrolling = true;
+            const targetSection = sections[index];
+            mainContainer.scrollTo({ top: targetSection.offsetTop, behavior: 'smooth' });
+            document.querySelectorAll('nav a').forEach(a => a.classList.remove('active-nav'));
+            document.querySelector(`nav a[href="#${targetSection.id}"]`).classList.add('active-nav');
+            setTimeout(() => { isScrolling = false; }, 800);
+        }
+        
+        document.querySelector('nav a[href="#intro"]').classList.add('active-nav');
+    </script>
+</body>
+</html>
